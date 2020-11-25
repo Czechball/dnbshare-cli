@@ -2,11 +2,30 @@
 
 #Download files from dnbshare.com
 
-URL="$1"
-PAGE_CONTENT=$(curl "$URL")
-DLFORM_FILENAME=$(echo "$PAGE_CONTENT" | grep -Po 'file" value="\K[^"]+')
-DLFORM_PAYLOAD=$(echo "$PAGE_CONTENT" | grep -Po 'payload" value="\K[^"]+')
+if [[ $* == "" ]]; then
+	echo "Usage: $0 <url> [options] (-h for help)"
+	exit
+fi
 
+while getopts ":d:" arg; do
+  case $arg in
+    d) DIRECTORY="$OPTARG";;
+  esac
+done
+
+if [[ $* == "-h" ]]; then
+	echo "dnbshare-download by Czechball, part of dnbshare-cli"
+	echo "https://github.com/Czechball/dnbshare-cli"
+	echo
+	printf "Usage:\n	%s <url>\nExample:\n	%s -d ~/Music https://dnbshare.com/download/Tsuki_Subsonic_-_Messiah_Madge_VIP_FREE_DOWNLOAD.mp3.html\n" "$0" "$0"
+	echo
+	exit
+fi
+
+URL="$1"
+PAGE_CONTENT=$(curl -s "$URL")
+DLFORM_FILENAME=$(echo "$PAGE_CONTENT" | grep -Po 'dlform-file" value="\K[^"]+')
+DLFORM_PAYLOAD=$(echo "$PAGE_CONTENT" | grep -Po 'dlform-payload" value="\K[^"]+')
 FILE_URL="$1?file=$DLFORM_FILENAME&payload=$DLFORM_PAYLOAD"
 
-wget --content-disposition "$FILE_URL"
+wget --content-disposition -q --show-progress "$FILE_URL"
