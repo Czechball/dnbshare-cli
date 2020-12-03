@@ -62,9 +62,10 @@ echo -e "\e[92m$PAGE_INFO\e[0m"
 
 C=1
 for FILE in ${LINKS[@]}; do
+  FILENAME=${FILE:10:-5}
   echo "Downloading file $C/${#LINKS[@]}"
-  if (test $FILE); then
-    echo "$FILE already exists, skipping"
+  if (test -f $NAME/$FILENAME); then
+    echo "$FILENAME already exists, skipping"
     C=$(expr $C + 1)
   else
     ./dnbshare-download.sh "https://dnbshare.com$FILE" "$NAME"
