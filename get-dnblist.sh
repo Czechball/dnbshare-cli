@@ -4,6 +4,12 @@
 
 DATE=$(date --iso-8601)
 
+if [[ $* == "" ]]; then
+  echo "Error: Specify a list to download"
+  echo "Usage: $0 <-l/-t/-p/-o/-s string>"
+  exit
+fi
+
 while getopts ":s:*:" arg; do
   case $arg in
     s) QUERY="$OPTARG";;
@@ -48,15 +54,20 @@ PAGE_CONTENT=$(curl -s 'https://dnbshare.com/ajax/ajax_filelisting.php' \
   --data-raw "$MODE")
 
 mapfile -t LINKS < <(echo "$PAGE_CONTENT" | grep -Po 'class="file"><a href="\K[^"]+')
-#mapfile -t INFOS < <(echo "$PAGE_CONTENT" | grep -Po 'title="\K[^"]+')
 
-#FILE_LIST=$(echo "$PAGE_CONTENT" | grep -Po 'class="file"><a href="\K[^"]+')
-#NAME_LIST=$(echo "$PAGE_CONTENT" | grep -Po 'title="\K[^"]+')
 PAGE_COMMENT=$(echo "$PAGE_CONTENT" | grep -Po '<!-- \K[^>]+')
 PAGE_INFO=${PAGE_COMMENT%--}
 
 echo -e "\e[92m$PAGE_INFO\e[0m"
 
+C=1
 for FILE in ${LINKS[@]}; do
-  ./dnbshare-download.sh "https://dnbshare.com$FILE" "$NAME"
+  echo "Downloading file $C/${#LINKS[@]}"
+  if (test $FILE); then
+    echo "$FILE already exists, skipping"
+    C=$(expr $C + 1)
+  else
+    ./dnbshare-download.sh "https://dnbshare.com$FILE" "$NAME"
+    C=$(expr $C + 1)
+  fi
 done
