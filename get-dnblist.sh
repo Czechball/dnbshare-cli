@@ -28,7 +28,7 @@ esac
 
 if [[ $1 == "-s" ]]; then
   MODE="filter=$QUERY"
-  NAME="Search-$QUERY-$DATE"
+  NAME="Search-$QUERY.$DATE"
 
 fi
 
@@ -47,13 +47,16 @@ PAGE_CONTENT=$(curl -s 'https://dnbshare.com/ajax/ajax_filelisting.php' \
   -H 'referer: https://dnbshare.com/download/' \
   --data-raw "$MODE")
 
-FILE_LIST=$(echo "$PAGE_CONTENT" | grep -Po 'class="file"><a href="\K[^"]+')
+mapfile -t LINKS < <(echo "$PAGE_CONTENT" | grep -Po 'class="file"><a href="\K[^"]+')
+#mapfile -t INFOS < <(echo "$PAGE_CONTENT" | grep -Po 'title="\K[^"]+')
+
+#FILE_LIST=$(echo "$PAGE_CONTENT" | grep -Po 'class="file"><a href="\K[^"]+')
+#NAME_LIST=$(echo "$PAGE_CONTENT" | grep -Po 'title="\K[^"]+')
 PAGE_COMMENT=$(echo "$PAGE_CONTENT" | grep -Po '<!-- \K[^>]+')
 PAGE_INFO=${PAGE_COMMENT%--}
 
-echo "$PAGE_INFO"
-echo
+echo -e "\e[92m$PAGE_INFO\e[0m"
 
-for FILE in $FILE_LIST; do
-  ./dnbshare-download.sh "https://dnbshare.com$FILE"
+for FILE in ${LINKS[@]}; do
+  ./dnbshare-download.sh "https://dnbshare.com$FILE" "$NAME"
 done
