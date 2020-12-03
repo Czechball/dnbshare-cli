@@ -7,6 +7,8 @@ if [[ $* == "" ]]; then
 	exit
 fi
 
+DIRECTORY="$2"
+
 while getopts ":d:" arg; do
   case $arg in
     d) DIRECTORY="$OPTARG";;
@@ -27,5 +29,10 @@ PAGE_CONTENT=$(curl -s "$URL")
 DLFORM_FILENAME=$(echo "$PAGE_CONTENT" | grep -Po 'dlform-file" value="\K[^"]+')
 DLFORM_PAYLOAD=$(echo "$PAGE_CONTENT" | grep -Po 'dlform-payload" value="\K[^"]+')
 FILE_URL="$1?file=$DLFORM_FILENAME&payload=$DLFORM_PAYLOAD"
+mkdir -p "$DIRECTORY"
 
-wget --content-disposition -q --show-progress "$FILE_URL"
+if [[ DIRECTORY == "" ]]; then
+	wget --content-disposition -q --show-progress "$FILE_URL"
+else
+	wget --content-disposition -q --show-progress -P "$DIRECTORY" "$FILE_URL"
+fi
