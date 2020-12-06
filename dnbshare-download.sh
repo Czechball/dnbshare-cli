@@ -20,7 +20,7 @@ while getopts ":d:h" arg; do
 	echo
 	exit
 	;;
-	\? ) echo bruh; exit
+	\? ) echo "Invalid argument. Use -h for help"; exit
 	;;
   esac
 done
