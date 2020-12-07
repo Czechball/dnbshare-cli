@@ -9,7 +9,7 @@ fi
 
 DIRECTORY="$2"
 
-while getopts ":d:h" arg; do
+while getopts "d: h" arg; do
   case ${arg} in
     d ) DIRECTORY="$OPTARG"
 	;;
